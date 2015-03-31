@@ -1,8 +1,10 @@
-//except namespace, it's all C
-#include "generic_header.h"
+#include <stdlib.h>
+#include <string.h>
 
 typedef unsigned int UINT;
 typedef unsigned char DIGIT, *PDIGIT;
+//0 is positive here
+enum SIGN { POSITIVE, NEGATIVE };
 
 typedef struct tagBIG
 {
@@ -227,7 +229,7 @@ PBIG mul(PBIG src, PBIG dst)
 PBIG factorial(unsigned int val)
 {
 	if (val < 2)
-			return bigFromStr("1", 1);
+		return bigFromStr("1", 1);
 	PBIG result = bigFromStr("1", 10);
 	for (int i = 2; i <= val; i++)
 	{
@@ -254,4 +256,5 @@ PBIG pow(PBIG base, unsigned int exp)
 		result = b;
 	}
 	return result;
-}	
+
+}
