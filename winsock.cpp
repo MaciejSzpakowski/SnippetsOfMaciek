@@ -1,14 +1,17 @@
-//except namespace and #pragma it's all C
 //WinSock2.h include must be before windows.h
 #include <Ws2tcpip.h>
 #include <WinSock2.h>
-#include "generic_header.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
 #include <process.h>
 //need to link this thingy for winsock
 #pragma comment(lib, "ws2_32.lib")
 
 namespace winsock
 {
+	typedef char* STRING;
 	HANDLE serverClientsMutex;
 	HANDLE consoleMutex;
 	#define strEqual(str1,str2,len) !memcmp(str1,str2,len)
