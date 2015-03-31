@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <windows.h>
 #include <process.h>
 //need to link this thingy for winsock
 #pragma comment(lib, "ws2_32.lib")
