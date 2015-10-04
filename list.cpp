@@ -1,12 +1,6 @@
-//#include "generic_header.h"
 #include <iostream>
-//#include <string>
-//#include <fstream>
-//#include <sstream>
-//#include <vector>
 #include <iterator>
 #include <algorithm>
-//#include "bst.h"
 
 template <class T>
 struct list_node
