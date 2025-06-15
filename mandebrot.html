@@ -1,0 +1,181 @@
+<html>
+<body style="background-color: lightgray">
+<div>Left click: move; Middle click: zoom; Pass this at the end of url for specific region (same at the numbers below): ?[size],[x],[y]</div>
+<div id="info"></div>
+<canvas id="c" width="2560px" height="2560px"></canvas>
+<script>
+let move = false;
+let zoom = false;
+let screenSize = 2560;
+let xoffset = -2;
+let yoffset = -2;
+let size = 4;
+let maxIterations = 256 * 4;
+let colors = [];
+let iterations = 0;
+
+for(let i=0;i<256;i++)
+	colors.push([i,i,i,255]);
+for(let i=0;i<256;i++)
+	colors.push([255 - i,255 -i,255 -i,255]);
+for(let i=0;i<256;i++)
+	colors.push([i,i,i,255]);
+for(let i=0;i<256;i++)
+	colors.push([255 -i,255 -i,255 -i,255]);
+	
+colors.push([0,0,0,255]);
+
+function complexAdd(a,b)
+{
+	return [a[0] + b[0], a[1] + b[1]];
+}
+
+function complexSq(a)
+{
+	return [a[0]*a[0]-a[1]*a[1],2*a[0]*a[1]];
+}
+
+function pixelToComplex(x, y)
+{
+	let real = x / screenSize * size + xoffset;
+	let imaginary = y / screenSize * size + yoffset;
+	return [real, imaginary];
+}
+
+function mandelbrot(complexNum)
+{
+	let val = complexNum;
+	let it = 0;
+	
+	while(it<maxIterations && val[0]*val[0] + val[1]*val[1] < 4)
+	{
+		iterations++;
+		val = complexAdd(complexSq(val), complexNum);
+		it++;
+	}
+	
+	return it;
+}
+
+function calcPixel(x, y)
+{
+	let num = pixelToComplex(x,y);
+	let it = mandelbrot(num);	
+	let color = colors[it];
+	
+	if(!color)
+	{
+		debugger;
+	}
+	
+	return color;
+}
+
+function draw()
+{
+	iterations = 0;
+	document.querySelector("#info").innerHTML = `Size: ${size}, x: ${xoffset}, y: ${yoffset}`;
+	let c = document.getElementById('c').getContext('2d');
+	let tex = c.createImageData(screenSize,screenSize);
+	
+	if(!move && !zoom)
+	{
+		for(let i=0;i<screenSize;i++)
+		for(let j=0;j<screenSize;j++)
+		{
+			let rgba = calcPixel(j,i);
+
+			tex.data[(i*screenSize+j)*4] = rgba[0];
+			tex.data[(i*screenSize+j)*4+1] = rgba[1];
+			tex.data[(i*screenSize+j)*4+2] = rgba[2];
+			tex.data[(i*screenSize+j)*4+3] = rgba[3];
+		}
+	}
+	else
+	{
+		for(let i=0;i<screenSize;i+=4)
+		for(let j=0;j<screenSize;j+=4)
+		{
+			let rgba = calcPixel(j,i);
+
+			for(let i2=0;i2<4;i2++)
+			for(let j2=0;j2<4;j2++)
+			{
+				tex.data[((i+i2)*screenSize+j+j2)*4] = rgba[0];
+				tex.data[((i+i2)*screenSize+j+j2)*4+1] = rgba[1];
+				tex.data[((i+i2)*screenSize+j+j2)*4+2] = rgba[2];
+				tex.data[((i+i2)*screenSize+j+j2)*4+3] = rgba[3];
+			}
+		}
+	}
+		
+	c.putImageData( tex,0, 0 );
+}
+
+document.addEventListener("mousedown", e => {
+	if(e.button == 0)
+		move = true;
+	else if(e.button == 1)
+		zoom = true;
+});
+document.addEventListener("mouseup", e => {
+	move = false;
+	zoom = false;
+	draw();
+});
+
+document.addEventListener("mousemove", e => 
+{
+	if(move)
+	{
+		xoffset -= e.movementX / screenSize * size;
+		yoffset -= e.movementY / screenSize * size;
+	
+		draw();
+	}
+	else if(zoom)
+	{
+		let val = e.movementX / screenSize;
+		console.log(val);
+		
+		size *= 1 - val;
+		xoffset += val/2 * size;
+		yoffset += val/2 * size;
+		
+		draw();
+	}
+});
+
+document.querySelector("#c").addEventListener("wheel", e => 
+{
+	if(e.deltaY > 0)
+	{
+		size *= 1.1;
+	}
+	else if(e.deltaY < 0)
+	{
+		size *= 0.9;
+		xoffset += 0.05 * size;
+		yoffset += 0.05 * size;
+	}
+		
+	draw();
+});
+
+// url 0.16786898676985634,-0.3592938383651303,-0.8580643386240246
+if(window.location.href.includes("?"))
+{
+	let values = window.location.href.split("?")[1].split(",").map(e => parseFloat(e)).filter(e => e && !isNaN(e));
+	
+	if(values.length == 3)
+	{
+		size = values[0];
+		xoffset = values[1];
+		yoffset = values[2];
+	}
+}
+
+draw();
+</script>
+</body>
+</html>
